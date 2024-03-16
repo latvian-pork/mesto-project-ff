@@ -2,9 +2,14 @@ import {
   cardContainer,
   addButton,
   editButton,
+  popups,
   addPopup,
   editPopup,
   cardPopup,
+  profileName,
+  profileJob,
+  popupImage,
+  imageDescription,
   addForm,
   editForm,
   placeInput,
@@ -20,17 +25,10 @@ import {
   deleteCard,
   handleLikeButton,
 } from "../components/card.js";
-import {
-  openPopup,
-  closePopup,
-  handleOverlayClick,
-  closeByEscape,
-} from "../components/modal.js";
+import { openPopup, closePopup, closeByEscape } from "../components/modal.js";
 
 const handleImageClick = (image, title) => {
   openPopup(cardPopup);
-  const popupImage = cardPopup.querySelector(".popup__image");
-  const imageDescription = cardPopup.querySelector(".popup__caption");
 
   popupImage.src = image.src;
   popupImage.alt = image.alt;
@@ -40,17 +38,11 @@ const handleImageClick = (image, title) => {
 function handleEditFormSubmit(evt) {
   evt.preventDefault();
 
-  const nameValue = nameInput.value;
-  const jobValue = jobInput.value;
-
-  const profileName = document.querySelector(".profile__title");
-  const profileJob = document.querySelector(".profile__description");
-
-  profileName.textContent = nameValue;
-  profileJob.textContent = jobValue;
+  profileName.textContent = nameInput.value;
+  profileJob.textContent = jobInput.value;
 
   closePopup(editPopup);
-};
+}
 
 function handleAddFormSubmit(evt) {
   evt.preventDefault();
@@ -58,12 +50,13 @@ function handleAddFormSubmit(evt) {
   const newCard = {};
   newCard.link = urlInput.value;
   newCard.name = placeInput.value;
+  evt.target.reset();
 
   cardContainer.prepend(
     createCard(newCard, handleLikeButton, handleImageClick)
   );
   closePopup(addPopup);
-};
+}
 
 initialCards.forEach((cardElement) => {
   cardContainer.append(
@@ -72,6 +65,22 @@ initialCards.forEach((cardElement) => {
 });
 
 addButton.addEventListener("click", () => openPopup(addPopup));
-editButton.addEventListener("click", () => openPopup(editPopup));
+
+editButton.addEventListener("click", () => {
+  openPopup(editPopup);
+  nameInput.value = profileName.textContent;
+  jobInput.value = profileJob.textContent;
+});
+
 editForm.addEventListener("submit", handleEditFormSubmit);
-addForm.addEventListener("submit", (evt) => handleAddFormSubmit(evt));
+addForm.addEventListener("submit", handleAddFormSubmit);
+
+popups.forEach((popup) => {
+  popup.addEventListener("mousedown", (evt) => {
+    if (evt.target.classList.contains("popup_is-opened")) {
+      closePopup(popup);
+    } else if (evt.target.classList.contains("popup__close")) {
+      closePopup(popup);
+    }
+  });
+});
