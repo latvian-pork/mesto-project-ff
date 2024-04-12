@@ -26,6 +26,7 @@ import {
   handleLikeButton,
 } from "../components/card.js";
 import { openPopup, closePopup, closeByEscape } from "../components/modal.js";
+import { enableValidation, clearValidation } from './validation.js';
 
 const handleImageClick = (image, title) => {
   openPopup(cardPopup);
@@ -51,7 +52,6 @@ function handleAddFormSubmit(evt) {
   newCard.link = urlInput.value;
   newCard.name = placeInput.value;
   evt.target.reset();
-
   cardContainer.prepend(
     createCard(newCard, handleLikeButton, handleImageClick)
   );
@@ -64,10 +64,20 @@ initialCards.forEach((cardElement) => {
   );
 });
 
-addButton.addEventListener("click", () => openPopup(addPopup));
+addButton.addEventListener("click", () => {
+  openPopup(addPopup);
+});
 
 editButton.addEventListener("click", () => {
   openPopup(editPopup);
+  clearValidation(editForm, {
+    formSelector: '.popup__form',
+    inputSelector: '.popup__input',
+    submitButtonSelector: '.popup__button',
+    inactiveButtonClass: 'popup__button_disabled',
+    inputErrorClass: 'popup__input_type_error',
+    errorClass: 'popup__error_visible'
+  });  
   nameInput.value = profileName.textContent;
   jobInput.value = profileJob.textContent;
 });
@@ -84,3 +94,12 @@ popups.forEach((popup) => {
     }
   });
 });
+
+enableValidation({
+  formSelector: '.popup__form',
+  inputSelector: '.popup__input',
+  submitButtonSelector: '.popup__button',
+  inactiveButtonClass: 'popup__button_disabled',
+  inputErrorClass: 'popup__input_type_error',
+  errorClass: 'popup__error_visible'
+}); 
