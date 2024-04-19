@@ -28,11 +28,10 @@ const createCard = (
     deleteButton.remove();
   }
 
-  cardData.likes.forEach((like) => {
-    if (like._id === user._id) {
-      likeButton.classList.add("card__like-button_is-active");
-    }
-  });
+
+  if(cardData.likes.some(like => like._id === user._id)) {
+    likeButton.classList.add('card__like-button_is-active');
+  };
 
   likeButton.addEventListener("click", (evt) =>
     handleLikeButton(evt.target, cardData, likeCount)
@@ -54,17 +53,17 @@ const deleteCardFromDOM = (card) => {
 };
 
 const handleLikeButton = (likeButton, cardData, likeCount) => {
-  if (likeButton.classList.contains("card__like-button_is-active")) {
-    deleteLike(cardData._id).then((cardData) => {
-      likeButton.classList.remove("card__like-button_is-active");
-      likeCount.textContent = cardData.likes.length;
-    });
-  } else {
-    likeCard(cardData._id).then((cardData) => {
-      likeCount.textContent = cardData.likes.length;
-      likeButton.classList.add("card__like-button_is-active");
-    });
-  }
+  
+  const likeMethod = (cardData) => likeButton.classList.contains('card__like-button_is-active') ? deleteLike(cardData._id) : likeCard(cardData._id);
+  likeMethod(cardData)
+  .then((cardData) => {
+    likeButton.classList.toggle('card__like-button_is-active');
+    likeCount.textContent = cardData.likes.length;
+  })
+  .catch((err) => {
+    console.log(err);
+  })
+  
 };
 
 export { createCard, deleteCard, handleLikeButton };

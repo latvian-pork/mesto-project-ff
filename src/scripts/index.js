@@ -23,50 +23,48 @@ import {
   userpicInput,
 } from "./constants.js";
 
-import { initialCards } from "./cards.js";
 import "../styles/index.css";
 import {
   createCard,
   deleteCard,
   handleLikeButton,
 } from "../components/card.js";
-import { openPopup, closePopup, closeByEscape } from "../components/modal.js";
+import { openPopup, closePopup } from "../components/modal.js";
 import {
   enableValidation,
   clearValidation,
-  toggleButtonState,
 } from "./validation.js";
 import {
   getInitialCards,
   getUserData,
   editUserData,
   postNewCard,
-  deleteUserCard,
-  likeCard,
-  deleteLike,
   changeAvatar,
 } from "./api.js";
 
 Promise.all([getInitialCards(), getUserData()]).then(([cards, user]) => {
+  
+  renderProfile(user);
+
   cards.forEach((cardData) => {
     renderInitialCards(cardData, user);
   });
-  renderUserData();
+  
+})
+.catch((err) => {
+  console.log(err);
 });
 
-const renderUserData = () => {
-  getUserData().then((userData) => {
-    const userName = document.querySelector(".profile__title");
-    const userDescription = document.querySelector(".profile__description");
-    const userImage = document.querySelector(".profile__image");
+const renderProfile = (userData) => {
 
-    userName.textContent = userData.name;
-    userDescription.textContent = userData.about;
-    userImage.style = `background-image: url('${userData.avatar}')`;
+  const userName = document.querySelector(".profile__title");
+  const userDescription = document.querySelector(".profile__description");
+  const userImage = document.querySelector(".profile__image");
 
-    return userData;
-  });
-};
+  userName.textContent = userData.name;
+  userDescription.textContent = userData.about;
+  userImage.style = `background-image: url('${userData.avatar}')`;
+}
 
 const renderInitialCards = (cardData, user) => {
   cardContainer.append(
@@ -84,25 +82,27 @@ const handleImageClick = (image, title) => {
 
 const renderLoading = (isLoading, formElement) => {
   const formButton = formElement.querySelector(".button");
-  if (isLoading) {
-    formButton.textContent = "Сохранение...";
-  } else {
-    formButton.textContent = "Сохранить";
-  }
+  formButton.textContent = isLoading ? 'Сохранение...' : 'Сохранить';
 };
 
-const handleEditFormSubmit= (evt) => {
+const handleEditFormSubmit = (evt) => {
   evt.preventDefault();
+  
   renderLoading(true, evt.target);
-  profileName.textContent = nameInput.value;
-  profileJob.textContent = jobInput.value;
 
-  editUserData(profileName.textContent, profileJob.textContent).finally(() => {
+  editUserData(nameInput.value, jobInput.value)
+  .then((profileData) => {
+    profileName.textContent = profileData.name;
+    profileJob.textContent = profileData.about;
+  })
+  .catch((err) => {
+    console.log(err);
+  })
+  .finally(() => {
     renderLoading(false, evt.target);
   });
   closePopup(editPopup);
   evt.target.reset();
-  toggleButtonState(validationConfig, evt.target);
 }
 
 const handleAddFormSubmit = (evt) => {
@@ -120,37 +120,43 @@ const handleAddFormSubmit = (evt) => {
         )
       );
     })
+    .catch((err) => {
+      console.log(err);
+    })
     .finally(() => {
       renderLoading(false, evt.target);
     });
 
   closePopup(addPopup);
   evt.target.reset();
-  toggleButtonState(validationConfig, evt.target);
 }
 
 const handleUserpicFormSubmit = (evt) => {
   evt.preventDefault();
   renderLoading(true, evt.target);
   changeAvatar(userpicInput.value)
-    .then(() => {
+    .then((userData) => {
       evt.target.reset();
+      profileImage.style = `background-image: url(${userData.avatar})`;
+    })
+    .catch((err) => {
+      console.log(err);
     })
     .finally(() => {
       renderLoading(false, evt.target);
     });
-  profileImage.style = `background-image: url(${userpicInput.value})`;
   closePopup(userpicPopup);
   evt.target.reset();
-  toggleButtonState(validationConfig, evt.target);
 };
 
 addButton.addEventListener("click", () => {
   openPopup(addPopup);
+  clearValidation(addForm, validationConfig);
 });
 
 userpicButton.addEventListener("click", () => {
   openPopup(userpicPopup);
+  clearValidation(userpicForm, validationConfig);
 });
 
 editButton.addEventListener("click", () => {
@@ -166,12 +172,10 @@ addForm.addEventListener("submit", handleAddFormSubmit);
 
 popups.forEach((popup) => {
   popup.addEventListener("mousedown", (evt) => {
-    if (evt.target.classList.contains("popup_is-opened")) {
+    if (evt.target.classList.contains("popup_is-opened") || evt.target.classList.contains("popup__close")) {
       closePopup(popup);
-    } else if (evt.target.classList.contains("popup__close")) {
-      closePopup(popup);
-    }
-  });
+}
+})
 });
 
 const validationConfig = {

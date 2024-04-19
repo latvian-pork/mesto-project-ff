@@ -12,16 +12,12 @@ const handleResponse = (res) => {
   }
   return Promise.reject(`Ошибка: ${res.status}`);
 };
-const catchError = (err) => {
-  console.log(err);
-};
 
 export const getInitialCards = () => {
   return fetch(`${config.baseUrl}/cards`, {
     headers: config.headers,
   })
     .then(handleResponse)
-    .catch(catchError);
 };
 
 export const getUserData = () => {
@@ -29,7 +25,6 @@ export const getUserData = () => {
     headers: config.headers,
   })
     .then(handleResponse)
-    .catch(catchError);
 };
 
 export const editUserData = (name, about) => {
@@ -42,7 +37,6 @@ export const editUserData = (name, about) => {
     }),
   })
     .then(handleResponse)
-    .catch(catchError);
 };
 
 export const postNewCard = (name, link) => {
@@ -50,12 +44,11 @@ export const postNewCard = (name, link) => {
     method: "POST",
     headers: config.headers,
     body: JSON.stringify({
-      name: `${name}`,
-      link: `${link}`,
+      name: name,
+      link: link,
     }),
   })
     .then(handleResponse)
-    .catch(catchError);
 };
 
 export const deleteUserCard = (id) => {
@@ -64,7 +57,6 @@ export const deleteUserCard = (id) => {
     headers: config.headers,
   })
     .then(handleResponse)
-    .catch(catchError);
 };
 
 export const likeCard = (id) => {
@@ -73,7 +65,6 @@ export const likeCard = (id) => {
     headers: config.headers,
   })
     .then(handleResponse)
-    .catch(catchError);
 };
 
 export const deleteLike = (id) => {
@@ -82,7 +73,6 @@ export const deleteLike = (id) => {
     headers: config.headers,
   })
     .then(handleResponse)
-    .catch(catchError);
 };
 
 export const changeAvatar = (url) => {
@@ -90,9 +80,8 @@ export const changeAvatar = (url) => {
     method: "PATCH",
     headers: config.headers,
     body: JSON.stringify({
-      avatar: `${url}`,
+      avatar: url,
     }),
   })
     .then(handleResponse)
-    .catch(catchError);
 };
